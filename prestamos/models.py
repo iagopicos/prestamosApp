@@ -12,6 +12,7 @@ class Persona(models.Model):
 class Prestamo(models.Model):
     amount = models.FloatField()
 
+
 class Solicitud(models.Model):
     persona_id = models.ForeignKey(Persona, on_delete=models.CASCADE)
     prestamo_id = models.ForeignKey(Prestamo, on_delete=models.CASCADE)
