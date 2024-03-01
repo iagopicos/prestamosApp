@@ -20,5 +20,6 @@ from prestamos import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('test/',views.index),
+    path('test/', views.Application.as_view()),
+    path('prestamos/',views.RetrieveView.as_view()),
 ]
