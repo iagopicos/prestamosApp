@@ -40,7 +40,8 @@ class Application(APIView):
                     data={"origin": origen, "raw_data": raw_data, "solicitud_id": solicitud.id})
                 if raw_solicitud.is_valid():
                     raw_solicitud.save()
-            detalle_serializer = SolicitudDetalleSerializer(solicitud,context={'request':request})
+            detalle_serializer = SolicitudDetalleSerializer(
+                solicitud, context={'request': request})
             return Response(detalle_serializer.data, status=status.HTTP_201_CREATED)
         return Response(persona_serializer.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
