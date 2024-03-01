@@ -3,31 +3,9 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
 
-from .models import Persona, Prestamo, Solicitud
+from .models import Persona, Prestamo, RawSolicitud, Solicitud
 from .serializers import PersonaSerializer, PrestamoSerializer, SolicitudSerializer, RawSolicitudSerializer, SolicitudDetalleSerializer
 from datetime import datetime
-
-
-@api_view(['GET', 'POST'])
-def index(request):
-
-    data = request.data
-
-    name = data.get('nombre')
-
-    if name:
-        first_name, second_name = data.get('apellidos').split(' ')
-    else:
-        name, first_name, second_name = data.get('nombreCompleto').split(' ')
-
-    birth_date = data.get('fechaNacimiento')
-
-    raw_data = str(request.data)
-
-    amount = data.get('cantidad') or data.get('cantidadSolicitada')
-
-    # return Response(" ".join([name, first_name, second_name]))
-    return Response(amount)
 
 
 class Application(APIView):
@@ -62,20 +40,29 @@ class Application(APIView):
                     data={"origin": origen, "raw_data": raw_data, "solicitud_id": solicitud.id})
                 if raw_solicitud.is_valid():
                     raw_solicitud.save()
-
-            return Response(persona_serializer.data, status=status.HTTP_201_CREATED)
+            detalle_serializer = SolicitudDetalleSerializer(solicitud,context={'request':request})
+            return Response(detalle_serializer.data, status=status.HTTP_201_CREATED)
         return Response(persona_serializer.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class RetrieveView(APIView):
     def get(self, request):
-        lista_solicitudes = Solicitud.objects.all()
+        lista_solicitudes = Solicitud.objects.all().order_by('-created_at')
         detalle_serializer = SolicitudDetalleSerializer(
-            lista_solicitudes, many=True)
-        return Response(detalle_serializer.data)
+            lista_solicitudes, many=True, context={'request': request})
+        return Response(detalle_serializer.data, status=status.HTTP_200_OK)
 
+
+class RetrieveRawData(APIView):
+    def get(self, request, pk):
+        raw_data = RawSolicitud.objects.get(solicitud_id=pk)
+
+        raw_data_serializer = RawSolicitudSerializer(raw_data)
+        return Response(raw_data_serializer.data, status=status.HTTP_200_OK)
 
 # Function to parse the dates format we can have
+
+
 def _parse_date(value):
     DATE_FORMAT = "%d/%m/%Y"
     INVERSE_DATE_FORMAT = "%Y/%m/%d"

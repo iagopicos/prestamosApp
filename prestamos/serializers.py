@@ -1,3 +1,4 @@
+from django.contrib.admin.utils import lookup_field
 from rest_framework import serializers
 from .models import Prestamo, Persona, Solicitud, RawSolicitud
 from datetime import datetime
@@ -17,21 +18,6 @@ class PersonaSerializer(serializers.ModelSerializer):
         model = Persona
         fields = ('id', 'name', 'birthdate')
 
-    # def validate_birthdate(self, value):
-    #     value.micasa
-    #     try:
-    #         parsed_date = datetime.strptime(value.get('birthday'), DATE_FORMAT)
-    #
-    #     except ValueError:
-    #         try:
-    #             parsed_date = datetime.strptime(
-    #                 value.get('birthday'), INVERSE_DATE_FORMAT)
-    #         except ValueError:
-    #             raise (ValueError("EL formato de fecha no es valido"))
-    #
-    #     return parsed_date
-    #
-
 
 class SolicitudSerializer(serializers.ModelSerializer):
     class Meta:
@@ -45,21 +31,34 @@ class RawSolicitudSerializer(serializers.ModelSerializer):
         fields = ('id', 'origin', 'raw_data', 'solicitud_id')
 
 
-class SolicitudDetalleSerializer(serializers.ModelSerializer):
+# class RawLinkSerializer(serializers.HyperlinkedModelSerializer):
+#     solicitud = serializers.HyperlinkedRelatedField(source='solicitud.id')
+#
+#     class Meta:
+#         model = RawSolicitud
+#         fields = ('solicitud', 'origin', 'raw_data')
+
+
+class SolicitudDetalleSerializer(serializers.HyperlinkedModelSerializer):
     name = serializers.SerializerMethodField()
     birthdate = serializers.SerializerMethodField()
     amount = serializers.SerializerMethodField()
+    source = serializers.HyperlinkedRelatedField(
+        view_name='solicitud-detail',
+        lookup_field='id',
+        read_only=True
+    )
 
     class Meta:
         model = Solicitud
-        fields = ('name', 'birthdate',
-                  'amount', 'created_at')
+        fields = ('id', 'name', 'birthdate',
+                  'amount', 'created_at', 'url', 'source')
 
     def get_name(self, obj):
         return obj.persona_id.name
 
     def get_birthdate(self, obj):
-        return obj.persona_id.birthdate
+        return obj.persona_id.birthdate.strftime("%d/%m/%Y")
 
     def get_amount(self, obj):
         return obj.prestamo_id.amount
