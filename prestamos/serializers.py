@@ -45,8 +45,21 @@ class RawSolicitudSerializer(serializers.ModelSerializer):
         fields = ('id', 'origin', 'raw_data', 'solicitud_id')
 
 
-class SolicitudCompletadaSerializer(serializers.Serializer):
-    fullname = serializers.CharField()
-    birthdate = serializers.DateField()
-    amount = serializers.FloatField()
-    created_at = serializers.DateTimeField()
+class SolicitudDetalleSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+    birthdate = serializers.SerializerMethodField()
+    amount = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Solicitud
+        fields = ('name', 'birthdate',
+                  'amount', 'created_at')
+
+    def get_name(self, obj):
+        return obj.persona_id.name
+
+    def get_birthdate(self, obj):
+        return obj.persona_id.birthdate
+
+    def get_amount(self, obj):
+        return obj.prestamo_id.amount

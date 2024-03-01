@@ -3,9 +3,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
 
-from django.http import JsonResponse
 from .models import Persona, Prestamo, Solicitud
-from .serializers import PersonaSerializer, PrestamoSerializer, SolicitudSerializer, RawSolicitudSerializer, SolicitudCompletadaSerializer
+from .serializers import PersonaSerializer, PrestamoSerializer, SolicitudSerializer, RawSolicitudSerializer, SolicitudDetalleSerializer
 from datetime import datetime
 
 
@@ -71,19 +70,9 @@ class Application(APIView):
 class RetrieveView(APIView):
     def get(self, request):
         lista_solicitudes = Solicitud.objects.all()
-        response = []
-        for solicitud in lista_solicitudes:
-            persona = Persona.objects.get(id=solicitud.persona_id.id)
-            prestamo = Prestamo.objects.get(id=solicitud.prestamo_id.id)
-            solicitud_completada = SolicitudCompletadaSerializer(
-                data={"fullname": persona.name,
-                      "birthdate": persona.birthdate,
-                      "amount": prestamo.amount,
-                      "created_at": solicitud.created_at})
-            solicitud_completada.is_valid()
-
-            response.append(solicitud_completada.data)
-        return JsonResponse(response, safe=False)
+        detalle_serializer = SolicitudDetalleSerializer(
+            lista_solicitudes, many=True)
+        return Response(detalle_serializer.data)
 
 
 # Function to parse the dates format we can have
