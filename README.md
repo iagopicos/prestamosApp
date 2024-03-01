@@ -12,9 +12,9 @@ docker-compose build && docker-compose up
  
 ## Endpoints disponibles para esta aplicacion.
 ```
-http://localhost:8000/prestamo # Recibe un json y crea una solicitud de prestamo
-http://localhost:8000/solicitudes # Muestra una lista de todas las solicitudes realizadas ordenadas por la mas reciente
-http://localhost:8000/raw/<int:pk> # Muestra la peticion orignal
+http://localhost:8000/api/v1/prestamo # Recibe un json y crea una solicitud de prestamo
+http://localhost:8000/api/v1solicitudes # Muestra una lista de todas las solicitudes realizadas ordenadas por la mas reciente
+http://localhost:8000/api/v1/raw/<int:pk> # Muestra la peticion orignal
 ```
 
 ## Modelos
